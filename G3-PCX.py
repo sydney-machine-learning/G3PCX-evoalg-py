@@ -129,7 +129,7 @@ class evolution:
 			
 			if j == 1:
 				d= centroid  - self.population[self.temp_index[0],:]
-				diff[j, :] = self.population[self.temp_index[j], :] - self.population[self.temp_index[0],:]
+			diff[j, :] = self.population[self.temp_index[j], :] - self.population[self.temp_index[0],:]
 			 
 
 
