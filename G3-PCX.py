@@ -21,7 +21,7 @@ import shutil
 class evolution:
 	def __init__(self, pop_size, dimen, max_evals,  max_limits, min_limits):
 		
-		self.EPSILON = 1e-50  # convergence
+		self.EPSILON = 1e-10  # convergence
 		self.sigma_eta = 0.1
 		self.sigma_zeta = 0.1
 
@@ -66,7 +66,7 @@ class evolution:
 		for j in range(x.size -1): 
 			fit += 100.0*(x[j]*x[j] - x[j+1])*(x[j]*x[j] - x[j+1]) + (x[j]-1.0)*(x[j]-1.0)
 
-		return fit
+		return  fit
 
 	def evaluate(self): 
 
@@ -115,51 +115,39 @@ class evolution:
 		temp1, temp2, temp3 = (0,0,0)
 
 		diff = np.zeros((self.num_parents, self.dimen))
+ 
+		for u in range(self.num_parents):
+			centroid  = centroid +  self.population[self.temp_index[u], :]
 
-		for i in range(self.dimen):
-			for u in range(self.num_parents):
-				centroid[i] += self.population[self.temp_index[u], i]
-			centroid[i] /= self.num_parents
+		centroid   = centroid / self.num_parents
 
 		print centroid, ' Centroid'
 
 
+
 		for j in range(1, self.num_parents):
-			for i in range(self.dimen):
-				if j == 1:
-					d[i] = centroid[i] - self.population[self.temp_index[0],i]
-
-				if(np.isnan(self.population[self.temp_index[j],i] - self.population[self.temp_index[0] ,i])):
-					print 'diff nan'
-					diff[j][i] = 1
-					return 0
-				else:
-					diff[j][i] = self.population[self.temp_index[j],i] - self.population[self.temp_index[0],i]
-
-			if (self.mod(diff[j])  < self.EPSILON):
-				# print "RUN Points are very close to each other. Quitting this run   "
-				return 0
-
-		#print d, ' d '
+			
+			if j == 1:
+				d= centroid  - self.population[self.temp_index[0],:]
+				diff[j, :] = self.population[self.temp_index[j], :] - self.population[self.temp_index[0],:]
+			 
 
 
-		dist = self.mod(d)
-
-		#print dist, ' dist'
+		dist = self.mod(d) 
 
 		if (dist < self.EPSILON):
-			# print "RUN Points are very close to each other. Quitting this run   "
+			print " Error -  points are very close to each other. Quitting this run   "
 			return 0
 
 		# orthogonal directions are computed
 		for j in range(1, self.num_parents):
-			temp1 = np.inner(diff[j].tolist(), d.tolist())
+			temp1 = np.inner(diff[j,:] , d )
 
-			if ((self.mod(diff[j]) * dist) == 0):
+			if ((self.mod(diff[j,:]) * dist) == 0):
 				print "Division by zero"
 				temp2 = temp1 / (1)
 			else:
-				temp2 = temp1 / (self.mod(diff[j]) * dist)
+				temp2 = temp1 / (self.mod(diff[j,:]) * dist)
  
 
 			temp3 = 1.0 - np.power(temp2, 2)
@@ -175,23 +163,20 @@ class evolution:
 		tempar1 = np.random.normal(0, self.sigma_eta, self.dimen) #rand_normal(0, D_not * sigma_eta);
 		tempar2 = tempar1 
 
-		for j in range(self.dimen):
-			if(np.power(dist, 2) == 0):
-				print " division by zero: part 2"
-				tempar2[j] = tempar1[j] - ((np.inner(tempar1, d) * d[j]) / 1)
-			else:
-				tempar2[j] = tempar1[j] - ((np.inner(tempar1, d) * d[j]) / np.power(dist, 2.0))
-
 		#for j in range(self.dimen):
+		if(np.power(dist, 2) == 0):
+			print " division by zero: part 2"
+			tempar2  = tempar1  - (    np.multiply(np.inner(tempar1, d) , d )  )
+		else:
+			tempar2  = tempar1  - (    np.multiply(np.inner(tempar1, d) , d )  ) / np.power(dist, 2.0) 
+ 
 		tempar1= tempar2 
+ 
+		self.sub_pop[current,:] = self.population[self.temp_index[0],:] + tempar1  
 
-		#for k in range(self.dimen):
-		self.sub_pop[current,:] = self.population[self.temp_index[0],:] + tempar1 
-
-		temp_rand = np.random.normal(0, self.sigma_zeta, 1)
-
-		for k in range(self.dimen):
-			self.sub_pop[current,k] += temp_rand  #* d[k])
+		#temp_rand = np.random.normal(0, self.sigma_zeta, self.dimen)
+ 
+		#self.sub_pop[current,:] += np.multiply(temp_rand ,  d )
  
 
  
@@ -221,8 +206,12 @@ class evolution:
 		for i in range(self.children + self.family):
 			self.list[i] = i
 
+		print self.list, ' sort_population list'
+
 		for i in range(self.children + self.family - 1):
 			dbest = self.sp_fit[self.list[i]] 
+
+
 
 			for j in range(i + 1, self.children + self.family):
 
@@ -231,6 +220,7 @@ class evolution:
 					temp = self.list[j]
 					self.list[j] = self.list[i]
 					self.list[i] = temp
+		print self.list, ' sort_population list after '
 
 
 	def replace_parents(self):
@@ -383,13 +373,13 @@ def main():
 
 	random.seed(time.time())
 
-	max_evals = 2000  # need to decide yourself 80000
+	max_evals = 1000 # need to decide yourself 80000
 
-	pop_size = 100
-	num_varibles = 5
+	pop_size = 50
+	num_varibles = 10
 
-	max_limits = [1, 1, 1, 1, 1]
-	min_limits = [0, 0, 0, 0, 0]
+	max_limits = np.repeat(5, num_varibles) 
+	min_limits = np.repeat(-5, num_varibles) 
  
 
 	g3pcx  = evolution(pop_size, num_varibles, max_evals,  max_limits, min_limits)
