@@ -21,7 +21,7 @@ import shutil
 class evolution:
 	def __init__(self, pop_size, dimen, max_evals,  max_limits, min_limits):
 		
-		self.EPSILON = 1e-10  # convergence
+		self.EPSILON = 1e-20  # convergence
 		self.sigma_eta = 0.1
 		self.sigma_zeta = 0.1
 
@@ -33,7 +33,7 @@ class evolution:
 
 
 		self.population =   np.random.randn( pop_size  , dimen)  * 5  #[SpeciesPopulation(dimen) for count in xrange(pop_size)]
-		self.sub_pop =  np.random.randn( self.sp_size , dimen )  * 5  #[SpeciesPopulation(dimen) for count in xrange(NPSize)]
+		self.sub_pop =  np.random.randn( self.sp_size , dimen )  *5  #[SpeciesPopulation(dimen) for count in xrange(NPSize)]
 
 		self.fitness = np.random.randn( pop_size)
 		self.sp_fit  = np.random.randn(self.sp_size)
@@ -58,7 +58,7 @@ class evolution:
 
 		self.max_evals = max_evals
 
-		self.problem = 2
+		self.problem = 1
 
 
 
@@ -183,17 +183,21 @@ class evolution:
  
 		self.sub_pop[current,:] = self.population[self.temp_index[0],:] + tempar1  
 
-		temp_rand = np.random.normal(0, self.sigma_zeta, self.dimen) 
+		u = np.random.uniform(0,1)
 
-		#for i in range(0, self.dimen):
-		#	self.sub_pop[current,:i] +=  (temp_rand[i] * d[i])
- 
-		self.sub_pop[current,:] += np.multiply(temp_rand ,  d ) 
+		if u < .5:
+			temp_rand = np.random.normal(0, self.sigma_zeta, self.dimen)  
+			self.sub_pop[current,:] += np.multiply(temp_rand ,  d ) 
+
+
 
 
   # the child is included in the newpop and is evaluated
 		self.sp_fit[current] = self.fit_func(self.sub_pop[current,:])
 		self.num_evals += 1
+
+		print current, self.sp_fit[current], ' current sp_fit'
+		print self.sub_pop[current,:], ' new pcx'
  
 
 
@@ -317,7 +321,7 @@ class evolution:
 
 		for i in range(self.rand_parents): 
 			index=  np.random.randint(self.pop_size)+i 
-			print index, ' index ..'
+			print index, ' index of rand_parents'
 
 			if index > (self.pop_size-1):
 				index = self.pop_size-1
@@ -331,7 +335,7 @@ class evolution:
 
 
 
-	def evolve(self   ):
+	def evolve(self, outfile   ):
  
 		tempfit = 99
 
@@ -377,16 +381,24 @@ class evolution:
 					self.best_index = i
 					self.best_fit = tempfit
 
-			print self.num_evals, self.best_index, self.best_fit, ' best so far'
+			print self.num_evals, self.best_index, self.best_fit, ' best so far --------------------  '
+
+			#np.savetxt(outfile, [ self.num_evals, self.best_index, self.best_fit], fmt='%1.5f', newline="\n")
+
 
 			print self.sub_pop, '  sub_pop'
 			print self.population[self.best_index], ' best sol'
-		print self.fitness, ' fitness'
+			print self.fitness, ' fitness'
  
  
  
 
 def main():
+
+
+	
+	outfile=open('results_fitness.txt','a')
+
 
 	 
  
@@ -396,10 +408,10 @@ def main():
 
 	random.seed(time.time())
 
-	max_evals = 10000# need to decide yourself 80000
+	max_evals = 20 # need to decide yourself 80000
 
-	pop_size =  50
-	num_varibles = 10
+	pop_size =  10 
+	num_varibles = 2
 
 	max_limits = np.repeat(5, num_varibles) 
 	min_limits = np.repeat(-5, num_varibles) 
@@ -408,7 +420,7 @@ def main():
 	g3pcx  = evolution(pop_size, num_varibles, max_evals,  max_limits, min_limits)
 
 
-	g3pcx.evolve()
+	g3pcx.evolve(outfile)
  
 
 
