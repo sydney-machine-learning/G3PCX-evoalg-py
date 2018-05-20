@@ -116,13 +116,16 @@ class evolution:
 		temp1, temp2, temp3 = (0,0,0)
 
 		diff = np.zeros((self.num_parents, self.dimen))
- 
-		for u in range(self.num_parents):
-			centroid  = centroid +  self.population[self.temp_index[u], :]
+ 		for i in range(self.dimen):
+			for u in range(self.num_parents):
+				centroid[i]  = centroid[i] +  self.population[self.temp_index[u],i]
+		centroid   = centroid / self.num_parents 
 
-		centroid   = centroid / self.num_parents
+		print u, centroid, '                                                      Centroid'
 
-		print centroid, ' Centroid'
+
+
+		
 
 
   # calculate the distace (d) from centroid to the index parent self.temp_index[0]
@@ -137,6 +140,8 @@ class evolution:
 			if (self.mod(diff[j,:]) < self.EPSILON):
 				print 'Points are very close to each other. Quitting this run' 
 				#return 0 
+
+		print d, '                                    ----- d --- '
 
 
 		dist = self.mod(d) 
@@ -336,6 +341,16 @@ class evolution:
 
 
 	def evolve(self, outfile   ):
+
+		#np.savetxt(outfile, self.population, fmt = '%1.2f' )
+
+		pop = np.loadtxt("pop_init.txt" )
+
+		self.population = pop
+
+		print self.population
+
+
  
 		tempfit = 99
 
@@ -351,6 +366,12 @@ class evolution:
 			tempfit = self.best_fit
 
 			self.random_parents()
+
+
+			self.temp_index = np.array([0, 6, 2, 3, 4, 5, 1, 7, 8, 9])
+
+			print self.temp_index, ' temp_index '
+
 
 			#print self.temp_index, ' temp_index'
 
@@ -397,7 +418,7 @@ def main():
 
 
 	
-	outfile=open('results_fitness.txt','a')
+	outfile=open('pop.txt','w')
 
 
 	 
@@ -408,10 +429,10 @@ def main():
 
 	random.seed(time.time())
 
-	max_evals = 20 # need to decide yourself 80000
+	max_evals = 50 # need to decide yourself 80000
 
 	pop_size =  10 
-	num_varibles = 2
+	num_varibles = 5
 
 	max_limits = np.repeat(5, num_varibles) 
 	min_limits = np.repeat(-5, num_varibles) 
