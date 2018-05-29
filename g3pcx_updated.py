@@ -8,6 +8,7 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
+np.set_printoptions(suppress=True) 
 import random
 import time
 import math
@@ -22,8 +23,8 @@ class evolution:
 	def __init__(self, pop_size, dimen, max_evals,  max_limits, min_limits):
 		
 		self.EPSILON = 1e-20  # convergence
-		self.sigma_eta = 0.1
-		self.sigma_zeta = 0.1
+		self.sigma_eta = 0.01
+		self.sigma_zeta = 0.01
 
 		self.children = 2
 		self.num_parents = 3 
@@ -79,6 +80,41 @@ class evolution:
 
 		return fit # note we will maximize fitness, hence minimize error 
 
+	def rand_normal(self, mean, stddev):
+
+		n2 = 0.0 
+		n2_cached = False 
+		
+		if (not n2_cached):
+			#choose a point x,y in the unit circle uniformly at random
+
+			x = np.random.uniform(-1,1,1) 
+			y = np.random.uniform(-1,1,1)  
+			r = x*x + y*y 
+
+			while (r == 0 or r > 1):
+				x = np.random.uniform(-1,1,1) 
+				y = np.random.uniform(-1,1,1)  
+				r = x*x + y*y 
+
+			# Apply Box-Muller transform on x, y
+			d = np.sqrt(-2.0*np.log(r)/r) 
+			n1 = x*d
+			n2 = y*d
+			# scale and translate to get desired mean and standard deviation
+
+			result = n1*stddev + mean  
+			n2_cached = True 
+			return result
+
+
+		else:
+			n2_cached = False
+			return n2*stddev + mean   
+
+
+ 
+
 
 	def evaluate(self): 
 
@@ -110,23 +146,22 @@ class evolution:
 		centroid = np.zeros(self.dimen)
 		tempar1 = np.zeros(self.dimen)
 		tempar2 = np.zeros(self.dimen)
+
+		temp_rand = np.zeros(self.dimen)
+
 		d = np.zeros(self.dimen)
 		D = np.zeros(self.num_parents)
 
 		temp1, temp2, temp3 = (0,0,0)
 
 		diff = np.zeros((self.num_parents, self.dimen))
- 		for i in range(self.dimen):
-			for u in range(self.num_parents):
+		for i in range(self.dimen):
+			for u in range(self.num_parents): 
+				#print self.temp_index[u], self.population[self.temp_index[u],i], ' self.population[self.temp_index[u],i]'
 				centroid[i]  = centroid[i] +  self.population[self.temp_index[u],i]
 		centroid   = centroid / self.num_parents 
-
-		print u, centroid, '                                                      Centroid'
-
-
-
-		
-
+ 
+ 
 
   # calculate the distace (d) from centroid to the index parent self.temp_index[0]
   # also distance (diff) between index and other parents are computed
@@ -137,14 +172,18 @@ class evolution:
 					d[i]= centroid[i]  - self.population[self.temp_index[0],i]
 				diff[j, i] = self.population[self.temp_index[j], i] - self.population[self.temp_index[0],i]
 
+
 			if (self.mod(diff[j,:]) < self.EPSILON):
 				print 'Points are very close to each other. Quitting this run' 
 				#return 0 
 
-		print d, '                                    ----- d --- '
+ 
+
 
 
 		dist = self.mod(d) 
+
+		#print dist, '                                         ---- dist --+++++++++++++++++++-------- '
 
 		if (dist < self.EPSILON):
 			print " Error -  points are very close to each other. Quitting this run   "
@@ -163,7 +202,8 @@ class evolution:
 
 			temp3 = 1.0 - np.power(temp2, 2)
 
-			D[j] = self.mod(diff[j]) * np.sqrt(np.abs(temp3))
+			D[j] = self.mod(diff[j]) * np.sqrt(np.abs(temp3)) 
+
 
  
  
@@ -173,7 +213,10 @@ class evolution:
 		D_not /= (self.num_parents - 1) # this is the average of the perpendicular distances from all other parents (minus the index parent) to the index vector
 
 		#for j in range(self.dimen):
-		tempar1 = np.random.normal(0,  self.sigma_eta, self.dimen) #rand_normal(0, D_not * sigma_eta);
+		#	tempar1[j] =  self.rand_normal(0, D_not * self.sigma_zeta) 
+
+		tempar1 = np.random.normal(0,  self.sigma_eta * D_not , self.dimen) #rand_normal(0, D_not * sigma_eta); 
+
 		tempar2 = tempar1 
  
 		if(np.power(dist, 2) == 0):
@@ -182,29 +225,25 @@ class evolution:
 		else:
 			tempar2  = tempar1  - (    np.multiply(self.inner(tempar1, d) , d )  ) / np.power(dist, 2.0) 
  
-		tempar1= tempar2  
- 
-  
+		tempar1= tempar2   
  
 		self.sub_pop[current,:] = self.population[self.temp_index[0],:] + tempar1  
-
-		u = np.random.uniform(0,1)
-
-		if u < .5:
-			temp_rand = np.random.normal(0, self.sigma_zeta, self.dimen)  
-			self.sub_pop[current,:] += np.multiply(temp_rand ,  d ) 
+		print current, self.sub_pop[current,:], ' * new pcx'
 
 
+		#for j in range(self.dimen):
+		#	temp_rand[j] =  self.rand_normal(0, self.sigma_zeta) 
+  
+ 
+		temp_rand = np.random.normal(0, self.sigma_zeta, self.dimen) 
 
 
+		self.sub_pop[current,:] += np.multiply(temp_rand ,  d ) 
+		print current, self.sub_pop[current,:], ' new pcx'
+  
   # the child is included in the newpop and is evaluated
 		self.sp_fit[current] = self.fit_func(self.sub_pop[current,:])
-		self.num_evals += 1
-
-		print current, self.sp_fit[current], ' current sp_fit'
-		print self.sub_pop[current,:], ' new pcx'
- 
-
+		self.num_evals += 1 
 
 		return 1
 
@@ -217,18 +256,6 @@ class evolution:
 		return  sum 
  
  
-
-	def family_members(self): #//here a random family (1 or 2) of parents is created who would be replaced by good individuals
-
-		swp = 0
-
-		for i in range(self.family):
-			randomIndex = random.randint(0, self.pop_size - 1)  # Get random index in population
-			swp = self.parents[randomIndex]
-			self.parents[randomIndex] = self.parents[i]
-			self.parents[i] = swp
-
-  
  
 
 	def sort_population(self):
@@ -252,17 +279,49 @@ class evolution:
 					temp = self.list[j]
 					self.list[j] = self.list[i]
 					self.list[i] = temp
-		print self.list, ' sort_population list after '
+
+ 
+
 
 
 	def replace_parents(self): #here the best (1 or 2) individuals replace the family of parents
 
 		for j in range(self.family):
 			self.population[ self.parents[j],:]  =  self.sub_pop[ self.list[j],:] # Update population with new species 
+
+
+			fx = self.fit_func(self.population[ self.parents[j],:]) 
+
+			print self.parents[j],  self.population[ self.parents[j],:] , fx,'                               replaced                        @@'
  
-			fitness = self.fit_func(self.population[j,:]) 
-			self.fitness[self.parents[j]]   =  fitness #self.sp_fit[self.list[j]]
+
+			self.fitness[self.parents[j]]   =  fx #self.sp_fit[self.list[j]]
 			self.num_evals += 1
+
+
+
+	def family_members(self): #//here a random family (1 or 2) of parents is created who would be replaced by good individuals
+
+		swp = 0
+
+
+		for i in range(self.pop_size): 
+			self.parents[i] = i
+
+		for i in range(self.family):
+			randomIndex = random.randint(0, self.pop_size - 1) + i # Get random index in population
+
+			if randomIndex > (self.pop_size-1):
+				randomIndex = self.pop_size-1
+
+			#print randomIndex, '               randomIndex   --------------------------------  ++++++++++++++   '
+			swp = self.parents[randomIndex]
+			self.parents[randomIndex] = self.parents[i]
+			self.parents[i] = swp 
+
+
+
+
 
 	def find_parents(self): #here the parents to be replaced are added to the temporary subpopulation to assess their goodness against the new solutions formed which will be the basis of whether they should be kept or not 
 
@@ -271,12 +330,20 @@ class evolution:
 
 		for j in range(self.family):
 			self.sub_pop[self.children + j, :] = self.population[self.parents[j],:]
-			fitness = self.fit_func(self.sub_pop[self.children + j, :])     
-			self.sp_fit[self.children + j]  = fitness
 
-			print j, fitness, ' find_parents fit'
+
+			fx = self.fit_func(self.sub_pop[self.children + j, :])     
+			self.sp_fit[self.children + j]  = fx
+
+
+			#print self.sub_pop[self.children + j, :] , self.children + j, fx, j , self.parents[j], '                             								******* -----------@' 
+			
+
+			 
 			self.num_evals += 1 
 
+ 
+  
  
 
 	def best_inpopulation(self): 
@@ -295,7 +362,7 @@ class evolution:
 				self.worst_fit = self.fitness[y]
  
 
-	def order_population(self): 
+	'''def order_population(self): 
 
 		for y in range( self.pop_size - 1):
 			min_idx = y
@@ -310,13 +377,11 @@ class evolution:
 		for x in range(self.pop_size):
 			if self.rank[x] == 0:
 				self.best_index = x
-				self.best_fit = self.fitness[x]
+				self.best_fit = self.fitness[x]'''
 
+ 
 
-		print('Completed Population Sort by Fitness') 
-
-
-	def random_parents(self):
+	def random_parents(self ):
  
 		for i in range(self.pop_size): 
 			self.temp_index[i] = i
@@ -324,18 +389,22 @@ class evolution:
 		swp=self.temp_index[0] 
 		self.temp_index[0]=self.temp_index[self.best_index] 
 
-		for i in range(self.rand_parents): 
-			index=  np.random.randint(self.pop_size)+i 
-			print index, ' index of rand_parents'
+		self.temp_index[self.best_index]  = swp 
+
+		 #best is always included as a parent and is the index parent
+		  # this can be changed for solving a generic problem
+
+		for i in range(1, self.rand_parents): 
+			index= np.random.randint(self.pop_size)+i  
 
 			if index > (self.pop_size-1):
 				index = self.pop_size-1
-				swp=self.temp_index[index] 
-				self.temp_index[index]=self.temp_index[i] 
-				self.temp_index[i]=swp 
+			swp=self.temp_index[index] 
+			self.temp_index[index]=self.temp_index[i] 
+			self.temp_index[i]=swp 
 
 
-
+ 
  
 
 
@@ -344,72 +413,137 @@ class evolution:
 
 		#np.savetxt(outfile, self.population, fmt = '%1.2f' )
 
-		pop = np.loadtxt("pop_init.txt" )
+		pop = np.loadtxt("pop.txt" )
+		genIndex = np.loadtxt("out3.txt" )
+		mom = np.loadtxt("out2.txt" )
 
-		self.population = pop
+		self.population = pop 
 
+		#print genIndex, ' genIndex'
 		print self.population
 
-
+		 
  
-		tempfit = 99
+		tempfit = 0
 
 		prevfitness = 99  
 
 		self.evaluate() 
 
+		print self.fitness
+
 		tempfit= self.fitness[self.best_index]
+
+		print tempfit, self.best_fit, self.best_index, ' initial best fit  -------------------------------------------------------------------'
+
+
+
+		vxx = 0
+
+
+
+		print self.best_fit, ' is initial best fit   ------------ ++ ------------ '
 
 
 		while(self.num_evals < self.max_evals):  
+
+
+			#print self.sub_pop, ' --------------------- initial sub_pop'
+			#print self.sp_fit, ' --------------------- initial sp_fit'
 
 			tempfit = self.best_fit
 
 			self.random_parents()
 
 
-			self.temp_index = np.array([0, 6, 2, 3, 4, 5, 1, 7, 8, 9])
+			print self.temp_index  , '  -------------------- --------------------------- index of rand_parents'
 
-			print self.temp_index, ' temp_index '
+			#print self.temp_index, ' self.temp'
 
+			#print vxx, '  i ****                            x'  
 
 			#print self.temp_index, ' temp_index'
 
+
 			for i in range(self.children):
+				#print i , '    *                        i     -------------->>>>>> ----------+++++++++++++++++++++++++++'
 				tag = self.parent_centric_xover(i) 
 				if (tag == 0):
 					break
-			if (tag == 0):
-					break
- 
+			#if (tag == 0):
+				#	break
+
+
 
 
 			self.find_parents()
-			self.sort_population()
-			self.replace_parents()
 
-			
-			print self.sp_fit, ' sp_fit'
+
+			self.parents = mom[vxx,:].astype(int)
  
 
+
+
+
+
+			vxx= vxx + 1
+
+
+
+			print self.parents,  '   -------------------------  ------------------------------------------------ self.parents'
+
+			print self.sub_pop, '  -----------------------find parents sub_pop'
+			print self.sp_fit, '------------------------- find parents sp_fit'
+
+
+			self.sort_population()
+
+			print self.sub_pop, ' sort_population sub_pop'
+			print self.sp_fit, ' sort_population sp_fit'
+
+
+
+
+			self.replace_parents()
+
+ 
+
+
 			self.best_index = 0
-			self.best_fit = self.fitness[0]
+			tempfit = self.fitness[0]
+
+			print self.sub_pop, '  replace_parents sub_pop'
+			print self.sp_fit, ' replace_parents sp_fit'
+
+			 
 
 
-			for i in range(1, self.pop_size):
-				if(self.fitness[i] < self.best_fit):
+			for x in range(1, self.pop_size):
+				if(self.fitness[x] < tempfit):
 
-					self.best_index = i
-					self.best_fit = tempfit
+					self.best_index = x
+					tempfit  =  self.fitness[x]
 
-			print self.num_evals, self.best_index, self.best_fit, ' best so far --------------------  '
+					#print self.best_fit, x, ' is initial best fit   ------------ ++ ------------ '
+
+
+			print self.fitness, ' fitness'
+
+			print self.sp_fit, ' sp_fit'
+
+
+			#print self.num_evals, self.best_index, self.best_fit, ' best so far --------------------  '
+			print self.fitness, ' fitness -------------- ** '
+			print self.num_evals, self.fitness[self.best_index], self.best_index, ' best sol         ---------------   ** ---------------** --'
+
+			print self.population
 
 			#np.savetxt(outfile, [ self.num_evals, self.best_index, self.best_fit], fmt='%1.5f', newline="\n")
 
 
-			print self.sub_pop, '  sub_pop'
-			print self.population[self.best_index], ' best sol'
-			print self.fitness, ' fitness'
+		print self.sub_pop, '  sub_pop'
+		print self.population[self.best_index], ' best sol                                         '
+		print self.fitness, ' fitness'
  
  
  
@@ -418,7 +552,7 @@ def main():
 
 
 	
-	outfile=open('pop.txt','w')
+	outfile=open('pop_.txt','w')
 
 
 	 
@@ -429,10 +563,10 @@ def main():
 
 	random.seed(time.time())
 
-	max_evals = 50 # need to decide yourself 80000
+	max_evals = 200   # need to decide yourself 80000
 
-	pop_size =  10 
-	num_varibles = 5
+	pop_size =  20
+	num_varibles = 2
 
 	max_limits = np.repeat(5, num_varibles) 
 	min_limits = np.repeat(-5, num_varibles) 
