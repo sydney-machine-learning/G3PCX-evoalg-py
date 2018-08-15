@@ -38,19 +38,10 @@ typedef vector<int> Sizes;
 typedef vector<vector<double> > Weight;
 typedef vector<vector<double> > Data;
 
-
-
-
 const int maxgen = 200  ; //max number of function eval. (termination criteria)
 
-
-
-
- #define rosen          // choose the function:
-
-
+#define rosen          // choose the function:
 #define EPSILON 1e-40
-
 #define MINIMIZE 1      //set 1 to minimize and -1 to maximize
 #define LIMIT 1e-20     //accuracy of best solution fitness desired
 #define KIDS 2          //pool size of kids to be formed (use 2,3 or 4)
@@ -58,22 +49,12 @@ const int maxgen = 200  ; //max number of function eval. (termination criteria)
 #define family 2        //number of parents to be replaced by good individuals(use 1 or 2)
 #define sigma_zeta 0.01
 #define sigma_eta 0.01   //variances used in PCX (best if fixed at these values)
-
-#define  PopSize 20
-
+#define PopSize 20
 #define NPSize KIDS + 2   //new pop size
-
 #define RandParent M+2     //number of parents participating in PCX
 
-
 double d_not[PopSize];
-
 double seed,basic_seed;
-
-
-
-
-
 
 //*************************************************
 
@@ -155,8 +136,7 @@ class GeneticAlgorithm{
    //-------------------------------
 
 
-double GeneticAlgorithm::RandomWeights()
-{
+double GeneticAlgorithm::RandomWeights(){
     int chance;
     double randomWeight;
     double NegativeWeight;
@@ -173,7 +153,7 @@ double GeneticAlgorithm::RandomWeights()
 }
 
 
-double GeneticAlgorithm::rand_normal(double mean, double stddev) { //Box Muller Random Numbers
+double GeneticAlgorithm::rand_normal(double mean, double stddev){ //Box Muller Random Numbers
     static double n2 = 0.0;
     static int n2_cached = 0;
     if (!n2_cached) {
@@ -431,6 +411,7 @@ int GeneticAlgorithm::GenerateNewPCX(int pass){
             Centroid[i]+=Population[TempIndex[j]].Chrome[i];
         }
         Centroid[i]  /= RandParent;
+        cout<<"\n";
         //for(i=0;i<NumVariable;i++)
         //    cout<<Centroid[i] << " ";
         // cout<< j << "     --   centroid "<<endl;
@@ -497,10 +478,10 @@ int GeneticAlgorithm::GenerateNewPCX(int pass){
         tempar1[j]=tempar2[j];
 
 
-    //for(j=0;j<NumVariable;j++)
-        // cout<<tempar1[j]<<" ";
+    for(j=0;j<NumVariable;j++)
+        cout<<tempar1[j]<<" ";
 
-    //  cout<<"                              - ---------------- tempar1 ++++++++++++++ "<<endl;
+     cout<<"                              - ---------------- tempar1 ++++++++++++++ "<<endl;
     for(k=0;k<NumVariable;k++){
         NewPop[pass].Chrome[k]=Population[TempIndex[0]].Chrome[k]+tempar1[k];
         cout<<  NewPop[pass].Chrome[k]<<" ";
@@ -509,12 +490,14 @@ int GeneticAlgorithm::GenerateNewPCX(int pass){
     tempvar=rand_normal(0, sigma_zeta);
     for(k=0;k<NumVariable;k++){
         NewPop[pass].Chrome[k] += (tempvar*d[k]);
-        cout<<  NewPop[pass].Chrome[k]<<" + ";
-        //NewPop[pass].Chrome[k] += (tempvar*d[k]);
+        // cout<<  NewPop[pass].Chrome[k]<<" + ";
+        NewPop[pass].Chrome[k] += (tempvar*d[k]);
     }
     cout<<pass<< "  -  --------------------------------------------------------  "<<endl;
     NewPop[pass].Fitness = Objective( NewPop[pass].Chrome);
+    cout<<"Fitness: "<< NewPop[pass].Fitness;
     NumEval++;
+    cout<<"\n\n";
     return (1);
 }
 
@@ -577,11 +560,12 @@ double GeneticAlgorithm:: MainAlgorithm(double RUN, ofstream &out1, ofstream &ou
     InitilisePopulation();
 
     for(int j=0;j<PopSize;j++){
-        for(int i=0;i<NumVariable;i++)
+        for(int i=0;i<NumVariable;i++){
             inFile >> Population[j].Chrome[i];
+        }
     }
 
-
+    cout<<"Population: \n";
     for(int j=0;j<PopSize;j++){
         for(int i=0;i<NumVariable;i++)
             cout<<Population[j].Chrome[i]<<" * ";
@@ -589,28 +573,39 @@ double GeneticAlgorithm:: MainAlgorithm(double RUN, ofstream &out1, ofstream &ou
     }
     Evaluate();
     tempfit=Population[BestIndex].Fitness;
+
+    cout<<"Fitness: ";
+    for(int j=0;j<PopSize;j++){
+        cout<<Population[j].Fitness<<" * ";
+    }
+    cout<<"\n";
+
+    cout<<tempfit<<" "<<BestFit<<" "<<BestIndex<<" Initial Best\n";
+
     while( NumEval < maxgen){
         RandomParents();           //random array of parents to do PCX is formed
-        //int ind[] = {9, 17, 6, 3, 4, 5, 2, 7, 8, 0 , 10 , 11 , 12, 13, 14 , 15 , 16, 1 , 18,  19};
+        // int ind[] = {9, 17, 6, 3, 4, 5, 2, 7, 8, 0 , 10 , 11 , 12, 13, 14 , 15 , 16, 1 , 18,  19};
         for(int j=0;j<PopSize;j++){
             // TempIndex[j] = ind[j];
             cout<<TempIndex[j]<< " ";
-            out3<<TempIndex[j]<< " ";
+            // out3<<TempIndex[j]<< " ";
         }
+
         cout<<endl;
-        out3<<endl;
+    //     out3<<endl;
         for(int i=0;i<kids;i++){
-            cout<<i<< "                               ---------------- *****  ----------------  ----------------------------------- # # #"<<endl;
+            cout<<"Pass: "<< i<<'\n';
         	tag = GenerateNewPCX(i);
        	    if (tag == 0) break;
         }
+
+
         //  if (tag == 0) break;
-        find_parents();  // form a pool from which a solution is to be
-        //   replaced by the created child
+        find_parents();  // form a pool from which a solution is to be replaced by the created child
         for(int j=0;j<PopSize;j++){
             // TempIndex[j] = ind[j];
             cout<<mom[j]<< " ~ ";
-            out2<<mom[j]<< " ";
+            // out2<<mom[j]<< " ";
         }
         cout<<endl;
         out2<<endl;
@@ -660,9 +655,14 @@ double GeneticAlgorithm:: MainAlgorithm(double RUN, ofstream &out1, ofstream &ou
     cout<<Cycles<<" ----"<<endl;
     Error = tempfit;
     TotalEval= NumEval;
-
-    for(int i=0;i<NumVariable;i++)
-        cout<<Population[BestIndex].Chrome[i]<<"  ***    ";
+    cout<<"--------------------------------------------------------------";
+    cout<<"\nPopulation:\n";
+    for(int j=1; j<PopSize; j++){
+        for(int i=0;i<NumVariable;i++)
+            cout<<Population[j].Chrome[i]<<" ";
+        cout<<"\n";
+    }
+    cout<<"--------------------------------------------------------------";
     cout<<"---->  "<< tempfit<<"     "<<count*kids<<"      "<<Cycles<<endl;
     //out2<<"Fitness of this best solution:"<<tempfit<<endl;
 
@@ -672,7 +672,7 @@ double GeneticAlgorithm:: MainAlgorithm(double RUN, ofstream &out1, ofstream &ou
         cout<<Population[BestIndex].Chrome[i]<<" ";
     cout<<endl;
 
-    cout<<"Fitness of this best solution:"<<tempfit<<" "<<StopwatchTimeInSeconds()<<endl;
+    cout<<"Fitness of this best solution:"<<Population[BestIndex].Fitness<<" "<<StopwatchTimeInSeconds()<<endl;
     inFile.close();
 }
 
@@ -713,7 +713,8 @@ int main(void)
 
          ErrorAverage.push_back(GenAlg.GetError());
         MeanError+= GenAlg.GetError();
-            cout<<GenAlg.GetCycle()<<" ----------------"<<endl;
+        cout<<"\n";
+            // cout<<GenAlg.GetCycle()<<" ----------------"<<endl;
         CycleAverage.push_back(GenAlg.GetCycle());
              MeanCycle+= GenAlg.GetCycle();
 
