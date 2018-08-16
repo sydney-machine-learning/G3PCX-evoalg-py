@@ -9,9 +9,8 @@ import math
 import os
 import shutil
 
-class evolution:
+class Evolution(object):
 	def __init__(self, pop_size, dimen, max_evals,  max_limits, min_limits):
-
 		self.EPSILON = 1e-20  # convergence
 		self.sigma_eta = 0.01
 		self.sigma_zeta = 0.01
@@ -68,7 +67,7 @@ class evolution:
 
 	def rand_normal(self, mean, stddev):
 
-		if (not evolution.n2_cached):
+		if (not Evolution.n2_cached):
 			#choose a point x,y in the unit circle uniformly at random
 			x = np.random.uniform(-1,1,1)
 			y = np.random.uniform(-1,1,1)
@@ -82,17 +81,17 @@ class evolution:
 			# Apply Box-Muller transform on x, y
 			d = np.sqrt(-2.0*np.log(r)/r)
 			n1 = x*d
-			evolution.n2 = y*d
+			Evolution.n2 = y*d
 			# scale and translate to get desired mean and standard deviation
 
 			result = n1*stddev + mean
-			evolution.n2_cached = True
+			Evolution.n2_cached = True
 			return result
 
 
 		else:
-			evolution.n2_cached = False
-			return evolution.n2*stddev + mean
+			Evolution.n2_cached = False
+			return Evolution.n2*stddev + mean
 
 
 
@@ -196,8 +195,8 @@ class evolution:
 
 		#for j in range(self.dimen):
 		#	tempar1[j] =  self.rand_normal(0, D_not * self.sigma_zeta)
-		evolution.n2 = 0.0
-		evolution.n2_cached = False
+		Evolution.n2 = 0.0
+		Evolution.n2_cached = False
 		for i in range(self.dimen):
 			tempar1[i] = self.rand_normal(0,  self.sigma_eta * D_not) #rand_normal(0, D_not * sigma_eta);
 			tempar2[i] = tempar1[i]
@@ -255,17 +254,17 @@ class evolution:
 
 		for i in range(self.children + self.family - 1):
 			dbest = self.sp_fit[self.list[i]]
-
-
-
 			for j in range(i + 1, self.children + self.family):
-
 				if(self.sp_fit[self.list[j]]  < dbest):
 					dbest = self.sp_fit[self.list[j]]
 					temp = self.list[j]
 					self.list[j] = self.list[i]
 					self.list[i] = temp
 
+		print "sorted sub population fit: ",
+		for i in range(self.children + self.family):
+			print self.sp_fit[self.list[i]], self.list[i]
+		print
 
 
 
@@ -371,7 +370,13 @@ class evolution:
 		  # this can be changed for solving a generic problem
 
 		for i in range(1, self.rand_parents):
-			index= np.random.randint(self.pop_size)+i
+			index= np.random.randint(self.pop_size)+i		# 	#print self.temp_index, ' self.temp'
+		#
+		# 	#print vxx, '  i ****                            x'
+		#
+		# 	#print self.temp_index, ' temp_index'
+		#
+		#
 
 			if index > (self.pop_size-1):
 				index = self.pop_size-1
@@ -415,10 +420,7 @@ class evolution:
 
 		# print self.best_fit, ' is initial best fit   ------------ ++ ------------ '
 
-
 		while(self.num_evals < self.max_evals):
-
-
 			#print self.sub_pop, ' --------------------- initial sub_pop'
 			#print self.sp_fit, ' --------------------- initial sp_fit'
 
@@ -431,13 +433,6 @@ class evolution:
 
 			print self.temp_index  , '  -------------------- --------------------------- index of rand_parents'
 
-		# 	#print self.temp_index, ' self.temp'
-		#
-		# 	#print vxx, '  i ****                            x'
-		#
-		# 	#print self.temp_index, ' temp_index'
-		#
-		#
 			for i in range(self.children):
 				#print i , '    *                        i     -------------->>>>>> ----------+++++++++++++++++++++++++++'
 				tag = self.parent_centric_xover(i)
@@ -464,11 +459,9 @@ class evolution:
 			print self.sub_pop, ' sort_population sub_pop'
 			print self.sp_fit, ' sort_population sp_fit'
 
-
-
-
+			print "\n\npopulation: ", self.population, "\n\n"
 			self.replace_parents()
-
+			print "\n\npopulation: ", self.population, "\n\n"
 
 
 
@@ -499,6 +492,7 @@ class evolution:
 			print self.fitness, ' fitness -------------- ** '
 			print self.num_evals, self.fitness[self.best_index], self.best_index, ' best sol         ---------------   ** ---------------** --'
 			print self.population
+			print self.num_evals, '\n\n\n\n\n\nnum of evals'
 			#np.savetxt(outfile, [ self.num_evals, self.best_index, self.best_fit], fmt='%1.5f', newline="\n")
 		print self.sub_pop, '  sub_pop'
 		print self.population[self.best_index], ' best sol                                         '
@@ -509,12 +503,12 @@ def main():
 	outfile=open('pop_.txt','w')
 	MinCriteria = 0.005  # stop when RMSE reaches MinCriteria ( problem dependent)
 	random.seed(time.time())
-	max_evals = 200
-	pop_size =  20
+	max_evals = 2000
+	pop_size =  200
 	num_varibles = 2
 	max_limits = np.repeat(5, num_varibles)
 	min_limits = np.repeat(-5, num_varibles)
-	g3pcx  = evolution(pop_size, num_varibles, max_evals,  max_limits, min_limits)
+	g3pcx  = Evolution(pop_size, num_varibles, max_evals,  max_limits, min_limits)
 	g3pcx.evolve(outfile)
 
 

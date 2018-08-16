@@ -38,7 +38,7 @@ typedef vector<int> Sizes;
 typedef vector<vector<double> > Weight;
 typedef vector<vector<double> > Data;
 
-const int maxgen = 200  ; //max number of function eval. (termination criteria)
+const int maxgen = 2000  ; //max number of function eval. (termination criteria)
 
 #define rosen          // choose the function:
 #define EPSILON 1e-40
@@ -49,7 +49,7 @@ const int maxgen = 200  ; //max number of function eval. (termination criteria)
 #define family 2        //number of parents to be replaced by good individuals(use 1 or 2)
 #define sigma_zeta 0.01
 #define sigma_eta 0.01   //variances used in PCX (best if fixed at these values)
-#define PopSize 20
+#define PopSize 200
 #define NPSize KIDS + 2   //new pop size
 #define RandParent M+2     //number of parents participating in PCX
 
@@ -615,11 +615,14 @@ double GeneticAlgorithm:: MainAlgorithm(double RUN, ofstream &out1, ofstream &ou
             cout<<j<< " find parents "<< NewPop[j].Fitness<<endl;
         }
         sort();          // sort the kids+parents by fitness
+        // cout<<"NPSize: "<<NPSize<<" kids+Parents: "<<kids+family<<"\n";
         for(int j=0;j<NPSize;j++){
             for(int i=0;i<NumVariable;i++)
                 cout<<NewPop[j].Chrome[i] << " ";
                 cout<<j<< " sort parents "<< NewPop[j].Fitness<<endl;
         }
+
+
         rep_parents();   // a chosen parent is replaced by the child
        	//finding the best in the population
         BestIndex=0;

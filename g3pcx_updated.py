@@ -544,8 +544,8 @@ def main():
 	outfile=open('pop_.txt','w')
 	MinCriteria = 0.005  # stop when RMSE reaches MinCriteria ( problem dependent)
 	random.seed(time.time())
-	max_evals = 200
-	pop_size =  20
+	max_evals = 2000
+	pop_size =  200
 	num_varibles = 2
 	max_limits = np.repeat(5, num_varibles)
 	min_limits = np.repeat(-5, num_varibles)
