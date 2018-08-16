@@ -38,7 +38,7 @@ typedef vector<int> Sizes;
 typedef vector<vector<double> > Weight;
 typedef vector<vector<double> > Data;
 
-const int maxgen = 2000  ; //max number of function eval. (termination criteria)
+const int maxgen = 2000; //max number of function eval. (termination criteria)
 
 #define rosen          // choose the function:
 #define EPSILON 1e-40
@@ -49,7 +49,7 @@ const int maxgen = 2000  ; //max number of function eval. (termination criteria)
 #define family 2        //number of parents to be replaced by good individuals(use 1 or 2)
 #define sigma_zeta 0.01
 #define sigma_eta 0.01   //variances used in PCX (best if fixed at these values)
-#define PopSize 200
+#define PopSize 20
 #define NPSize KIDS + 2   //new pop size
 #define RandParent M+2     //number of parents participating in PCX
 
@@ -156,6 +156,7 @@ double GeneticAlgorithm::RandomWeights(){
 double GeneticAlgorithm::rand_normal(double mean, double stddev){ //Box Muller Random Numbers
     static double n2 = 0.0;
     static int n2_cached = 0;
+    // cout<<n2_cached<<"\n";
     if (!n2_cached) {
         // choose a point x,y in the unit circle uniformly at random
         double x, y, r;
@@ -172,10 +173,12 @@ double GeneticAlgorithm::rand_normal(double mean, double stddev){ //Box Muller R
         // scale and translate to get desired mean and standard deviation
         double result = n1*stddev + mean;
         n2_cached = 1;
+        // cout<<result<<"\n";
         return result;
     }
     else {
         n2_cached = 0;
+        // cout<<n2*stddev + mean<<"\n";
         return n2*stddev + mean;
     }
 }
@@ -294,7 +297,7 @@ void GeneticAlgorithm:: my_family(){
         //   0index=(u*(PopSize-i))+i;
         index = (rand()%PopSize) +i;
 
-        cout<<"is index         --------------------------------   +++++++++++++++++++++++++++++++++++++++++++++++++++++++ "<<index<<endl;
+        // cout<<"is index         --------------------------------   +++++++++++++++++++++++++++++++++++++++++++++++++++++++ "<<index<<endl;
         if(index>(PopSize-1))
             index=PopSize-1;
         swp=mom[index];
@@ -327,7 +330,7 @@ void GeneticAlgorithm::rep_parents() {
         for(i=0;i<NumVariable;i++)
             Population[mom[j]].Chrome[i]=NewPop[list[j]].Chrome[i];
         Population[mom[j]].Fitness = Objective(Population[mom[j]].Chrome);
-        cout<< mom[j]<<" "<< Population[mom[j]].Fitness<<  "                                     @@@@" <<endl;
+        // cout<< mom[j]<<" "<< Population[mom[j]].Fitness<<  "                                     @@@@" <<endl;
         NumEval++;
     }
 }
@@ -405,6 +408,7 @@ int GeneticAlgorithm::GenerateNewPCX(int pass){
         Centroid[i]=0.0;
 
     // centroid is calculated here
+    cout<<"\n";
     for(i=0;i<NumVariable;i++){
         for(j=0;j<RandParent;j++){
             cout<< TempIndex[j]<<" ";
@@ -412,10 +416,10 @@ int GeneticAlgorithm::GenerateNewPCX(int pass){
         }
         Centroid[i]  /= RandParent;
         cout<<"\n";
-        //for(i=0;i<NumVariable;i++)
-        //    cout<<Centroid[i] << " ";
-        // cout<< j << "     --   centroid "<<endl;
     }
+    for(i=0;i<NumVariable;i++)
+       cout<<Centroid[i] << " ";
+    cout<< "     --   centroid "<<endl;
     // cout<< "  ****                                                     centroid done "<<endl;
     // calculate the distace (d) from centroid to the index parent arr1[0]
     // also distance (diff) between index and other parents are computed
@@ -430,19 +434,20 @@ int GeneticAlgorithm::GenerateNewPCX(int pass){
             return (0);
         }*/
     }
-    for(i=0;i<NumVariable;i++)
-        cout<<Centroid[i] << " ";
-    cout<<   "     --   centroid "<<endl;
+    // for(i=0;i<NumVariable;i++)
+    //     cout<<Centroid[i] << " ";
+    // cout<<   "     --   centroid "<<endl;
 
     for(i=0;i<NumVariable;i++)
         cout<<d[i] << " ";
-    cout<<"                              -----------       d "<<endl;
+    cout<<"     ---      d "<<endl;
+    cout<<"diff: \n";
     for(j=1;j<RandParent;j++){
         for(i=0;i<NumVariable;i++)
         cout<<diff[j][i]<< " ";
         cout<<endl;
     }
-    cout<<"                              -----------       diff ---------------- "<<endl;
+    cout<<"----------------------------- "<<endl;
     dist=modu(d); // modu calculates the magnitude of the vector
     if (dist < EPSILON){
       cout<< "RUN Points are very close to each other. Quitting this run    " <<endl;
@@ -456,9 +461,9 @@ int GeneticAlgorithm::GenerateNewPCX(int pass){
         D[i]=modu(diff[i])*sqrt(temp3);
     }
 
-    //for(i=1;i<RandParent;i++)
-    // cout<<D[i]<< " ";
-    // cout<<"                              -----------       D  ----------------  ++++++++++++++ "<<endl;
+    for(i=1;i<RandParent;i++)
+        cout<<D[i]<< " ";
+    cout<<"                              -----------       D  ----------------  ++++++++++++++ "<<endl;
 
 
     D_not=0;
@@ -478,26 +483,26 @@ int GeneticAlgorithm::GenerateNewPCX(int pass){
         tempar1[j]=tempar2[j];
 
 
-    for(j=0;j<NumVariable;j++)
-        cout<<tempar1[j]<<" ";
+    // for(j=0;j<NumVariable;j++)
+    //     cout<<tempar1[j]<<" ";
 
-     cout<<"                              - ---------------- tempar1 ++++++++++++++ "<<endl;
+     // cout<<"                              - ---------------- tempar1 ++++++++++++++ "<<endl;
     for(k=0;k<NumVariable;k++){
         NewPop[pass].Chrome[k]=Population[TempIndex[0]].Chrome[k]+tempar1[k];
-        cout<<  NewPop[pass].Chrome[k]<<" ";
+        // cout<<  NewPop[pass].Chrome[k]<<" ";
     }
-    cout<<pass<<"  -  ------------------------->>>> --------------------pcx"<<endl;
+    // cout<<pass<<"  -  ------------------------->>>> --------------------pcx"<<endl;
     tempvar=rand_normal(0, sigma_zeta);
     for(k=0;k<NumVariable;k++){
         NewPop[pass].Chrome[k] += (tempvar*d[k]);
         // cout<<  NewPop[pass].Chrome[k]<<" + ";
         NewPop[pass].Chrome[k] += (tempvar*d[k]);
     }
-    cout<<pass<< "  -  --------------------------------------------------------  "<<endl;
+    // cout<<pass<< "  -  --------------------------------------------------------  "<<endl;
     NewPop[pass].Fitness = Objective( NewPop[pass].Chrome);
-    cout<<"Fitness: "<< NewPop[pass].Fitness;
+    // cout<<"Fitness: "<< NewPop[pass].Fitness;
     NumEval++;
-    cout<<"\n\n";
+    // cout<<"\n\n";
     return (1);
 }
 
@@ -520,7 +525,7 @@ double GeneticAlgorithm::  RandomParents(){
     for(i=1;i<RandParent;i++){
         //u=randomperc();
         index=(rand()%PopSize)+i;
-        cout<<index<< " is index random parent"<<endl;
+        // cout<<index<< " is index random parent"<<endl;
         if(index>(PopSize-1))
         index=PopSize-1;
         swp=TempIndex[index];
@@ -562,76 +567,78 @@ double GeneticAlgorithm:: MainAlgorithm(double RUN, ofstream &out1, ofstream &ou
     for(int j=0;j<PopSize;j++){
         for(int i=0;i<NumVariable;i++){
             inFile >> Population[j].Chrome[i];
+            // cout<<Population[j].Chrome[i]<<" ";
         }
+        // cout<<"\n";
     }
 
-    cout<<"Population: \n";
-    for(int j=0;j<PopSize;j++){
-        for(int i=0;i<NumVariable;i++)
-            cout<<Population[j].Chrome[i]<<" * ";
-        cout<<endl;
-    }
+    // cout<<"Population: \n";
+    // for(int j=0;j<PopSize;j++){
+    //     for(int i=0;i<NumVariable;i++)
+    //         cout<<Population[j].Chrome[i]<<" * ";
+    //     cout<<endl;
+    // }
     Evaluate();
     tempfit=Population[BestIndex].Fitness;
 
-    cout<<"Fitness: ";
-    for(int j=0;j<PopSize;j++){
-        cout<<Population[j].Fitness<<" * ";
-    }
-    cout<<"\n";
+    // cout<<"Fitness: ";
+    // for(int j=0;j<PopSize;j++){
+    //     cout<<Population[j].Fitness<<" * ";
+    // }
+    // cout<<"\n";
 
-    cout<<tempfit<<" "<<BestFit<<" "<<BestIndex<<" Initial Best\n";
+    // cout<<tempfit<<" "<<BestFit<<" "<<BestIndex<<" Initial Best\n";
 
     while( NumEval < maxgen){
-        RandomParents();           //random array of parents to do PCX is formed
-        // int ind[] = {9, 17, 6, 3, 4, 5, 2, 7, 8, 0 , 10 , 11 , 12, 13, 14 , 15 , 16, 1 , 18,  19};
+        // RandomParents();           //random array of parents to do PCX is formed
+        int ind[] = {9, 17, 6, 3, 4, 5, 2, 7, 8, 0 , 10 , 11 , 12, 13, 14 , 15 , 16, 1 , 18,  19};
         for(int j=0;j<PopSize;j++){
-            // TempIndex[j] = ind[j];
+            TempIndex[j] = ind[j];
             cout<<TempIndex[j]<< " ";
             // out3<<TempIndex[j]<< " ";
         }
-
-        cout<<endl;
-    //     out3<<endl;
+        // cout<<endl;
+        // out3<<endl;
         for(int i=0;i<kids;i++){
-            cout<<"Pass: "<< i<<'\n';
+            // cout<<"Pass: "<< i<<'\n';
         	tag = GenerateNewPCX(i);
+            break;
        	    if (tag == 0) break;
         }
 
 
         //  if (tag == 0) break;
         find_parents();  // form a pool from which a solution is to be replaced by the created child
-        for(int j=0;j<PopSize;j++){
-            // TempIndex[j] = ind[j];
-            cout<<mom[j]<< " ~ ";
-            // out2<<mom[j]<< " ";
-        }
-        cout<<endl;
-        out2<<endl;
-        for(int j=0;j<NPSize;j++){
-            for(int i=0;i<NumVariable;i++)
-                cout<<NewPop[j].Chrome[i] << " ";
-            cout<<j<< " find parents "<< NewPop[j].Fitness<<endl;
-        }
+        // for(int j=0;j<PopSize;j++){
+        //     // TempIndex[j] = ind[j];
+        //     cout<<mom[j]<< " ~ ";
+        //     // out2<<mom[j]<< " ";
+        // }
+        // cout<<endl;
+        // out2<<endl;
+        // for(int j=0;j<NPSize;j++){
+        //     for(int i=0;i<NumVariable;i++)
+        //         cout<<NewPop[j].Chrome[i] << " ";
+        //     cout<<j<< " find parents "<< NewPop[j].Fitness<<endl;
+        // }
         sort();          // sort the kids+parents by fitness
         // cout<<"NPSize: "<<NPSize<<" kids+Parents: "<<kids+family<<"\n";
-        for(int j=0;j<NPSize;j++){
-            for(int i=0;i<NumVariable;i++)
-                cout<<NewPop[j].Chrome[i] << " ";
-                cout<<j<< " sort parents "<< NewPop[j].Fitness<<endl;
-        }
+        // for(int j=0;j<NPSize;j++){
+        //     for(int i=0;i<NumVariable;i++)
+        //         cout<<NewPop[j].Chrome[i] << " ";
+        //         cout<<j<< " sort parents "<< NewPop[j].Fitness<<endl;
+        // }
 
 
         rep_parents();   // a chosen parent is replaced by the child
        	//finding the best in the population
         BestIndex=0;
         tempfit=Population[0].Fitness;
-        for(int j=0;j<NPSize;j++){
-            for(int i=0;i<NumVariable;i++)
-                cout<<NewPop[j].Chrome[i] << " ";
-            cout<<j<< "  rep_parents "<< NewPop[j].Fitness<<endl;
-        }
+        // for(int j=0;j<NPSize;j++){
+        //     for(int i=0;i<NumVariable;i++)
+        //         cout<<NewPop[j].Chrome[i] << " ";
+        //     cout<<j<< "  rep_parents "<< NewPop[j].Fitness<<endl;
+        // }
         //cout<<tempfit<<endl;
         for(int i=1;i<PopSize;i++){
             if((MINIMIZE * Population[i].Fitness) < (MINIMIZE * tempfit)){
@@ -639,52 +646,53 @@ double GeneticAlgorithm:: MainAlgorithm(double RUN, ofstream &out1, ofstream &ou
                 BestIndex=i;
             }
         }
-        for(int j=0;j<PopSize;j++){
-            for(int i=0;i<NumVariable;i++)
-                cout<<Population[j].Chrome[i]<<" * ";
-            cout<<endl;
-        }
-        for(int j=0;j<PopSize;j++){
-            cout<<Population[j].Fitness << "       ";
-            // out2<<Population[j].Fitness<< " ";
-        }
-        cout<<endl;
+        // for(int j=0;j<PopSize;j++){
+        //     for(int i=0;i<NumVariable;i++)
+        //         cout<<Population[j].Chrome[i]<<" * ";
+        //     cout<<endl;
+        // }
+        // for(int j=0;j<PopSize;j++){
+        //     cout<<Population[j].Fitness << "       ";
+        //     // out2<<Population[j].Fitness<< " ";
+        // }
+        // cout<<endl;
         // out2<<endl;
-        cout<< NumEval <<"   "  << Population[BestIndex].Fitness<< "  "<< BestIndex<<"   --------------- *** --------------***---------------------*** ---------- "<<endl;
+        // cout<< NumEval <<"   "  << Population[BestIndex].Fitness<< "  "<< BestIndex<<endl;
+        break;
 	}
-    out1 <<"   ---------------  "<<endl;
+    // out1 <<"   ---------------  "<<endl;
     clock_t finish = clock();
     Cycles = ((double)(finish - start))/CLOCKS_PER_SEC;
-    cout<<Cycles<<" ----"<<endl;
+    // cout<<Cycles<<" ----"<<endl;
     Error = tempfit;
     TotalEval= NumEval;
-    cout<<"--------------------------------------------------------------";
-    cout<<"\nPopulation:\n";
-    for(int j=1; j<PopSize; j++){
-        for(int i=0;i<NumVariable;i++)
-            cout<<Population[j].Chrome[i]<<" ";
-        cout<<"\n";
-    }
-    cout<<"--------------------------------------------------------------";
-    cout<<"---->  "<< tempfit<<"     "<<count*kids<<"      "<<Cycles<<endl;
+    // cout<<"--------------------------------------------------------------";
+    // cout<<"\nPopulation:\n";
+    // for(int j=1; j<PopSize; j++){
+    //     for(int i=0;i<NumVariable;i++)
+    //         cout<<Population[j].Chrome[i]<<" ";
+    //     cout<<"\n";
+    // }
+    // cout<<"--------------------------------------------------------------";
+    // cout<<"---->  "<< tempfit<<"     "<<count*kids<<"      "<<Cycles<<endl;
     //out2<<"Fitness of this best solution:"<<tempfit<<endl;
 
-    cout<<"Best solution obtained after X function evaluations:"<<count*kids<<" "<<NumEval<<endl;
-
-    for(int i=0;i<NumVariable;i++)
-        cout<<Population[BestIndex].Chrome[i]<<" ";
-    cout<<endl;
-
-    cout<<"Fitness of this best solution:"<<Population[BestIndex].Fitness<<" "<<StopwatchTimeInSeconds()<<endl;
-    inFile.close();
+    // cout<<"Best solution obtained after X function evaluations:"<<count*kids<<" "<<NumEval<<endl;
+    //
+    // for(int i=0;i<NumVariable;i++)
+    //     cout<<Population[BestIndex].Chrome[i]<<" ";
+    // cout<<endl;
+    //
+    // cout<<"Fitness of this best solution:"<<Population[BestIndex].Fitness<<" "<<StopwatchTimeInSeconds()<<endl;
+    // inFile.close();
 }
 
 
 int main(void)
 {
 
-    int VSize =2; //number of variables (dimension) for problem
-
+    int VSize = 2; //number of variables (dimension) for problem
+    srand(100);
     ofstream out1;
     out1.open("out1.txt");
     ofstream out2;

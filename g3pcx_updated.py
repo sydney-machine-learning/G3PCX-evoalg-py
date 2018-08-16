@@ -546,7 +546,7 @@ def main():
 	random.seed(time.time())
 	max_evals = 2000
 	pop_size =  200
-	num_varibles = 2
+	num_varibles = 5
 	max_limits = np.repeat(5, num_varibles)
 	min_limits = np.repeat(-5, num_varibles)
 	g3pcx  = evolution(pop_size, num_varibles, max_evals,  max_limits, min_limits)
