@@ -11,7 +11,7 @@ import shutil
 
 class Evolution(object):
 	def __init__(self, pop_size, dimen, max_evals,  max_limits, min_limits):
-		self.EPSILON = 1e-20  # convergence
+		self.EPSILON = 1e-40  # convergence
 		self.sigma_eta = 0.1
 		self.sigma_zeta = 0.1
 		self.children = 2
