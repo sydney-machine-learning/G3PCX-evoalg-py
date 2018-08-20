@@ -12,8 +12,8 @@ import shutil
 class Evolution(object):
 	def __init__(self, pop_size, dimen, max_evals,  max_limits, min_limits):
 		self.EPSILON = 1e-20  # convergence
-		self.sigma_eta = 0.01
-		self.sigma_zeta = 0.01
+		self.sigma_eta = 0.1
+		self.sigma_zeta = 0.1
 		self.children = 2
 		self.num_parents = 3
 		self.family = 2
@@ -317,9 +317,9 @@ def main():
 	outfile=open('pop_.txt','w')
 	MinCriteria = 0.005  # stop when RMSE reaches MinCriteria ( problem dependent)
 	random.seed(time.time())
-	max_evals = 400000
-	pop_size =  200
-	num_varibles = 8
+	max_evals = 500000
+	pop_size =  100
+	num_varibles = 5
 	max_limits = np.repeat(5, num_varibles)
 	min_limits = np.repeat(-5, num_varibles)
 	g3pcx  = Evolution(pop_size, num_varibles, max_evals,  max_limits, min_limits)
