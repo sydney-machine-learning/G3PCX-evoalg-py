@@ -38,7 +38,7 @@ typedef vector<int> Sizes;
 typedef vector<vector<double> > Weight;
 typedef vector<vector<double> > Data;
 
-const int maxgen = 2000  ; //max number of function eval. (termination criteria)
+const int maxgen = 20000  ; //max number of function eval. (termination criteria)
 
 #define rosen          // choose the function:
 #define EPSILON 1e-40
@@ -47,8 +47,8 @@ const int maxgen = 2000  ; //max number of function eval. (termination criteria)
 #define KIDS 2          //pool size of kids to be formed (use 2,3 or 4)
 #define M 1             //M+2 is the number of parents participating in xover (use 1)
 #define family 2        //number of parents to be replaced by good individuals(use 1 or 2)
-#define sigma_zeta 0.01
-#define sigma_eta 0.01   //variances used in PCX (best if fixed at these values)
+#define sigma_zeta 0.1
+#define sigma_eta 0.1   //variances used in PCX (best if fixed at these values)
 #define PopSize 200
 #define NPSize KIDS + 2   //new pop size
 #define RandParent M+2     //number of parents participating in PCX
@@ -226,8 +226,8 @@ void GeneticAlgorithm::Evaluate(){
             BestFit = Population[row].Fitness;
             BestIndex = row;
         }
-        NumEval++;
     }
+    NumEval++;
 }
 
 
@@ -425,10 +425,10 @@ int GeneticAlgorithm::GenerateNewPCX(int pass){
                 d[i]=Centroid[i]-Population[TempIndex[0]].Chrome[i];
             diff[j][i]=Population[TempIndex[j]].Chrome[i]-Population[TempIndex[0]].Chrome[i];
         }
-        /*if (modu(diff[j]) < EPSILON){
+        if (modu(diff[j]) < EPSILON){
             cout<< "RUN Points are very close to each other. Quitting this run   " <<endl;
             return (0);
-        }*/
+        }
     }
     for(i=0;i<NumVariable;i++)
         cout<<Centroid[i] << " ";
@@ -500,10 +500,6 @@ int GeneticAlgorithm::GenerateNewPCX(int pass){
     cout<<"\n\n";
     return (1);
 }
-
-
-
-
 //------------------------------------------------------------------------
 double GeneticAlgorithm::  RandomParents(){
     int i,j,index;
@@ -683,7 +679,7 @@ double GeneticAlgorithm:: MainAlgorithm(double RUN, ofstream &out1, ofstream &ou
 int main(void)
 {
 
-    int VSize =2; //number of variables (dimension) for problem
+    int VSize = 8; //number of variables (dimension) for problem
 
     ofstream out1;
     out1.open("out1.txt");
