@@ -36,7 +36,7 @@ class Evolution(object):
 		self.max_evals = max_evals
 		self.problem = 1
 
-	def fit_func(self, x):    #   function  (can be any other function, model or even a neural network)
+	def fit_func(self, x):    #  function  (can be any other function, model or even a neural network)
 		fit = 0.0
 		if self.problem == 1: # rosenbrock
 			for j in range(x.size -1):
@@ -193,20 +193,6 @@ class Evolution(object):
 			fx = self.fit_func(self.sub_pop[self.children + j, :])
 			self.sp_fit[self.children + j]  = fx
 			self.num_evals += 1
-
-	# def best_inpopulation(self):
-	# 	self.best_fit = self.fitness[0]
-	# 	for y in range(self.pop_size):
-	# 		if  self.fitness[y]< best_fit:
-	# 			self.best_index = y
-	# 			self.best_fit = self.fitness[y]
-	#
-	# def worst_inpopulation(self):
-	# 	worst_fit = 0
-	# 	for y in range(self.pop_size):
-	# 		if  self.fitness[y] > worst_fit:
-	# 			self.worst_index = y
-	# 			self.worst_fit = self.fitness[y]
 
 	def random_parents(self ):
 		for i in range(self.pop_size):
