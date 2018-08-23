@@ -699,7 +699,7 @@ double GeneticAlgorithm:: MainAlgorithm(double RUN, ofstream &out1, ofstream &ou
 
 	   			  // print out results after every x FEs
 	   	              if (  NumEval%197 == 0   )
-	   			   out1<<NumEval<<"    "<<tempfit<<"  "<<endl;
+	   			   cout<<NumEval<<"    "<<tempfit<<"  "<<endl;
 
     	}
 
@@ -756,7 +756,7 @@ int main(void)
 	 	       	 double ErrorSum=0;
 	 	       	double CycleSum=0;
 
-	 	       	int maxrun=10;
+	 	       	int maxrun=1;
 	for(int RUN=1;RUN<=maxrun;RUN++)
 	     {
 	    GeneticAlgorithm GenAlg(VSize);
