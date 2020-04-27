@@ -34,7 +34,7 @@ class Evolution(object):
 		self.dimen = dimen
 		self.num_evals = 0
 		self.max_evals = max_evals
-		self.problem = 1
+		self.problem = 1 
 
 	def fit_func(self, x):    #  function  (can be any other function, model or even a neural network)
 		fit = 0.0
@@ -70,6 +70,9 @@ class Evolution(object):
 			return Evolution.n2*stddev + mean
 
 	def evaluate(self):
+
+ 
+
 		self.fitness[0] = self.fit_func(self.population[0,:])
 		self.best_fit = self.fitness[0]
 		for i in range(self.pop_size):
@@ -94,11 +97,16 @@ class Evolution(object):
 		d = np.zeros(self.dimen)
 		D = np.zeros(self.num_parents)
 		temp1, temp2, temp3 = (0,0,0)
-		diff = np.zeros((self.num_parents, self.dimen))
+		diff = np.zeros((self.num_parents, self.dimen)) 
+
+ 
+
+
 		for i in range(self.dimen):
 			for u in range(self.num_parents):
+				
 				centroid[i]  = centroid[i] +  self.population[self.temp_index[u],i]
-		centroid   = centroid / self.num_parents
+		centroid   = centroid / self.num_parents 
 		# calculate the distace (d) from centroid to the index parent self.temp_index[0]
 		# also distance (diff) between index and other parents are computed
 		for j in range(1, self.num_parents):
@@ -107,17 +115,17 @@ class Evolution(object):
 					d[i]= centroid[i]  - self.population[self.temp_index[0],i]
 				diff[j, i] = self.population[self.temp_index[j], i] - self.population[self.temp_index[0],i]
 			if (self.mod(diff[j,:]) < self.EPSILON):
-				print 'Points are very close to each other. Quitting this run'
+				print('Points are very close to each other. Quitting this run')
 				return 0
 		dist = self.mod(d)
 		if (dist < self.EPSILON):
-			print " Error -  points are very close to each other. Quitting this run   "
+			print( " Error -  points are very close to each other. Quitting this run   ")
 			return 0
 		# orthogonal directions are computed
 		for j in range(1, self.num_parents):
 			temp1 = self.inner(diff[j,:] , d )
 			if ((self.mod(diff[j,:]) * dist) == 0):
-				print "Division by zero"
+				print("Division by zero")
 				temp2 = temp1 / (1)
 			else:
 				temp2 = temp1 / (self.mod(diff[j,:]) * dist)
@@ -133,7 +141,7 @@ class Evolution(object):
 			tempar1[i] = self.rand_normal(0,  self.sigma_eta * D_not) #rand_normal(0, D_not * sigma_eta);
 			tempar2[i] = tempar1[i]
 		if(np.power(dist, 2) == 0):
-			print " division by zero: part 2"
+			print(" division by zero: part 2")
 			tempar2  = tempar1
 		else:
 			tempar2  = tempar1  - (    np.multiply(self.inner(tempar1, d) , d )  ) / np.power(dist, 2.0)
@@ -155,6 +163,8 @@ class Evolution(object):
 		return  sum
 
 	def sort_population(self):
+
+ 
 		dbest = 99
 		for i in range(self.children + self.family):
 			self.list[i] = i
@@ -168,6 +178,8 @@ class Evolution(object):
 					self.list[i] = temp
 
 	def replace_parents(self): #here the best (1 or 2) individuals replace the family of parents
+
+ 
 		for j in range(self.family):
 			self.population[ self.parents[j],:]  =  self.sub_pop[ self.list[j],:] # Update population with new species
 			fx = self.fit_func(self.population[ self.parents[j],:])
@@ -175,6 +187,8 @@ class Evolution(object):
 			self.num_evals += 1
 
 	def family_members(self): #//here a random family (1 or 2) of parents is created who would be replaced by good individuals
+
+ 
 		swp = 0
 		for i in range(self.pop_size):
 			self.parents[i] = i
@@ -188,6 +202,7 @@ class Evolution(object):
 
 	def find_parents(self): #here the parents to be replaced are added to the temporary subpopulation to assess their goodness against the new solutions formed which will be the basis of whether they should be kept or not
 		self.family_members()
+ 
 		for j in range(self.family):
 			self.sub_pop[self.children + j, :] = self.population[self.parents[j],:]
 			fx = self.fit_func(self.sub_pop[self.children + j, :])
@@ -195,6 +210,10 @@ class Evolution(object):
 			self.num_evals += 1
 
 	def random_parents(self ):
+
+ 
+
+
 		for i in range(self.pop_size):
 			self.temp_index[i] = i
 
@@ -213,10 +232,13 @@ class Evolution(object):
 
 	def evolve(self, outfile   ):
 		#np.savetxt(outfile, self.population, fmt = '%1.2f' )
-		pop = np.loadtxt("pop.txt" )
-		genIndex = np.loadtxt("out3.txt" )
-		mom = np.loadtxt("out2.txt" )
-		self.population = pop
+
+ 
+
+		#pop = np.loadtxt("pop.txt" )
+		#genIndex = np.loadtxt("out3.txt" )
+		#mom = np.loadtxt("out2.txt" )
+		#self.population = pop
 		tempfit = 0
 		prevfitness = 99
 		self.evaluate()
@@ -240,22 +262,23 @@ class Evolution(object):
 					self.best_index = x
 					tempfit  =  self.fitness[x]
 			if self.num_evals % 197 == 0:
-				print self.population[self.best_index]
-				print self.num_evals, 'num of evals\n\n\n'
+				print(self.population[self.best_index])
+				print(self.num_evals, 'num of evals\n\n\n')
 			np.savetxt(outfile, [ self.num_evals, self.best_index, self.best_fit], fmt='%1.5f', newline="\n")
-		print self.sub_pop, '  sub_pop'
-		print self.population[self.best_index], ' best sol                                         '
-		print self.fitness[self.best_index], ' fitness'
+		print(self.sub_pop, '  sub_pop')
+		print(self.population[self.best_index], ' best sol'   )              
+		print(self.fitness[self.best_index], ' fitness')
 
 
 def main():
 	outfile=open('pop_.txt','w')
 	MinCriteria = 0.005  # stop when RMSE reaches MinCriteria ( problem dependent)
 	random.seed(time.time())
-	max_evals = 700000
+	max_evals = 100000
 	pop_size =  100
-	num_varibles = 5
+	num_varibles = 20
 	max_limits = np.repeat(5, num_varibles)
+	print(max_limits, ' max_limits')
 	min_limits = np.repeat(-5, num_varibles)
 	g3pcx  = Evolution(pop_size, num_varibles, max_evals,  max_limits, min_limits)
 	g3pcx.evolve(outfile)
